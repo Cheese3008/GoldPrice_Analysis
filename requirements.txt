@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+mysql-connector-python
+sqlalchemy
+pymysql
+selenium
+webdriver-manager
+flask 
+flask_sqlalchemy 
