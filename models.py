@@ -15,8 +15,8 @@ class GoldPrice(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     source = Column(String(20), nullable=False)             # SJC / DOJI / PNJ
     gold_type = Column(String(100), nullable=False)         # Loại vàng
-    buy_price = Column(Float, nullable=False)               # Giá mua (kiểu số)
-    sell_price = Column(Float, nullable=False)              # Giá bán (kiểu số)
+    buy_price = Column(String(225), nullable=False)         # Giá mua (kiểu số)
+    sell_price = Column(String(225), nullable=False)        # Giá bán (kiểu số)
     date = Column(Date, nullable=True)                      # Ngày được cập nhật trên web
     time = Column(Time, nullable=True)                      # Giờ cập nhật (nếu có)
     scraped_at = Column(DateTime, default=datetime.utcnow)  # Thời điểm hệ thống lấy dữ liệu
@@ -25,32 +25,22 @@ class GoldPrice(Base):
         Index('ix_gold_type_date', 'gold_type', 'date'),
     )
 
-# Thông tin kết nối
-DB_USER = 'root'
-DB_PASSWORD = 'baotran'
-DB_HOST = 'localhost'
-DB_PORT = 3306
-DB_NAME = 'ql_tiemvang'
+DATABASE_URL = "postgresql+psycopg2://laravel:npg_iy7pRE5rLmtj@ep-odd-lake-a1450ad3.aws-ap-southeast-1.pg.laravel.cloud:5432/main"
 
-# Kết nối ban đầu để kiểm tra sự tồn tại của database
+# Kết nối PostgreSQL ban đầu để kiểm tra sự tồn tại của database
 try:
-    initial_engine = create_engine(f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}', echo=False)
-    inspector = inspect(initial_engine)
-    databases = inspector.get_schema_names()
+    initial_engine = create_engine(DATABASE_URL, echo=True)
 
-    if DB_NAME not in databases:
-        with initial_engine.connect() as conn:
-            conn.execute(text(f"CREATE DATABASE {DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"))
-            print(f"✅ Cơ sở dữ liệu '{DB_NAME}' đã được tạo thành công.")
-    else:
-        print(f"✅ Cơ sở dữ liệu '{DB_NAME}' đã tồn tại.")
+    with initial_engine.connect() as conn:
+        result = conn.execute(text(f"SELECT 1"))
+        print(f"✅ Kết nối đến PostgreSQL thành công.")
 except Exception as e:
-    print("❌ Lỗi khi kết nối hoặc tạo cơ sở dữ liệu:", e)
+    print("❌ Lỗi khi kết nối:", e)
     exit(1)
 
-# Kết nối lại với cơ sở dữ liệu đã có
+# Kết nối lại với PostgreSQL đã có
 engine = create_engine(
-    f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4', echo=False
+    DATABASE_URL, echo=False
 )
 
 # Tạo bảng nếu chưa tồn tại
@@ -67,17 +57,3 @@ except Exception as e:
 
 # Tạo session và đóng sau khi dùng
 Session = sessionmaker(bind=engine)
-
-def test_session_connection():
-    session = Session()
-    try:
-        # Kiểm tra kết nối bằng cách đếm số bản ghi
-        count = session.query(GoldPrice).count()
-        print(f"✅ Kết nối thành công. Hiện có {count} bản ghi trong bảng 'gold_prices'.")
-    except Exception as e:
-        print("❌ Lỗi khi truy vấn bảng:", e)
-    finally:
-        session.close()
-
-# Gọi thử
-test_session_connection()
