@@ -9,10 +9,10 @@
             "server": "localhost",
             "port": 3306,
             "driver": "MySQL",
-            "name": "quanly_tiemvang",
+            "name": "QL_Tiemvang",
             "database": "QL_TiemVang",
             "username": "root",
-            "password": "baotran"
+            "password": "giahuy"
         }
     ]
 }
